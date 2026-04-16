@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Complaint - SANKALP{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light">
+                    <h3 class="mb-0 fw-bold">
+                        <i class="fas fa-edit text-primary"></i> Edit Complaint #{{ complaint.id }}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Complaint Info -->
+                    <div class="mb-4 p-3 bg-light rounded">
+                        <h5 class="fw-bold">{{ complaint.title }}</h5>
+                        <p class="text-muted mb-0">Submitted by: {% if complaint.anonymous %}Anonymous{% else %}{{ complaint.user.username }}{% endif %}</p>
+                        <small class="text-muted">{{ complaint.created_at|date:"M d, Y H:i" }}</small>
+                    </div>
+
+                    <form method="POST" class="needs-validation">
+                        {% csrf_token %}
+
+                        <!-- Status Update -->
+                        <div class="mb-4">
+                            <label for="status" class="form-label fw-bold">Status</label>
+                            <select class="form-select form-input" id="status" name="status" required>
+                                <option value="">Choose Status</option>
+                                <option value="Pending" {% if complaint.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                <option value="In Progress" {% if complaint.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                <option value="Resolved" {% if complaint.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                                <option value="Rejected" {% if complaint.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                            </select>
+                            <div class="invalid-feedback">Please select a status</div>
+                        </div>
+
+                        <!-- Priority Update -->
+                        <div class="mb-4">
+                            <label for="priority" class="form-label fw-bold">Priority</label>
+                            <select class="form-select form-input" id="priority" name="priority">
+                                <option value="Low" {% if complaint.priority == 'Low' %}selected{% endif %}>Low</option>
+                                <option value="Medium" {% if complaint.priority == 'Medium' %}selected{% endif %}>Medium</option>
+                                <option value="High" {% if complaint.priority == 'High' %}selected{% endif %}>High</option>
+                            </select>
+                        </div>
+
+                        <!-- Staff Comment -->
+                        <div class="mb-4">
+                            <label for="comment" class="form-label fw-bold">Staff Comment/Update</label>
+                            <textarea class="form-control form-input" id="comment" name="comment" rows="5" 
+                                      placeholder="Add your staff comment or update here..."></textarea>
+                            <small class="text-muted">This will be visible to the user as a staff response</small>
+                        </div>
+
+                        <hr>
+
+                        <!-- Comments Section -->
+                        {% if comments %}
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Comments History</h6>
+                            {% for comment in comments %}
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <strong>
+                                            {% if comment.is_staff %}
+                                            <i class="fas fa-shield-alt text-warning"></i> Staff Response
+                                            {% else %}
+                                            {{ comment.user.username }}
+                                            {% endif %}
+                                        </strong>
+                                    </div>
+                                    <small class="text-muted">{{ comment.timestamp|date:"M d, Y H:i" }}</small>
+                                </div>
+                                <p class="text-muted mb-0">{{ comment.text }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary-gradient">
+                                <i class="fas fa-save"></i> Update Complaint
+                            </button>
+                            <a href="/admin-dashboard" class="btn btn-light">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

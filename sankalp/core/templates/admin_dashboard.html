@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - SANKALP{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    {% if not user.is_staff %}
+    <div class="alert alert-danger">
+        <i class="fas fa-lock"></i> Access Denied. Admin privileges required.
+    </div>
+    {% else %}
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="fw-bold">
+                <i class="fas fa-cogs"></i> Admin Dashboard
+            </h1>
+            <p class="text-muted">Campus Management Control Panel</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="/admin-users" class="btn btn-outline-primary me-2">
+                <i class="fas fa-users"></i> Manage Users
+            </a>
+            <a href="/admin-reports" class="btn btn-outline-success">
+                <i class="fas fa-chart-bar"></i> Reports
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm bg-gradient">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Total Complaints</p>
+                            <h3 class="fw-bold mb-0">{{ total_complaints }}</h3>
+                            <small class="text-muted">System-wide</small>
+                        </div>
+                        <i class="fas fa-file-alt fa-2x text-primary opacity-30"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Pending Issues</p>
+                            <h3 class="fw-bold text-warning mb-0">{{ pending_count }}</h3>
+                            <small class="text-muted">Need attention</small>
+                        </div>
+                        <i class="fas fa-hourglass-half fa-2x text-warning opacity-30"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Active Users</p>
+                            <h3 class="fw-bold text-info mb-0">{{ active_users }}</h3>
+                            <small class="text-muted">Registered</small>
+                        </div>
+                        <i class="fas fa-users fa-2x text-info opacity-30"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Resolution Rate</p>
+                            <h3 class="fw-bold text-success mb-0">{{ resolution_rate }}%</h3>
+                            <small class="text-muted">This month</small>
+                        </div>
+                        <i class="fas fa-chart-pie fa-2x text-success opacity-30"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row">
+        <!-- All Complaints -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-list"></i> All Complaints
+                        </h5>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <input type="radio" class="btn-check" name="filter" id="all" checked>
+                            <label class="btn btn-outline-secondary" for="all">All</label>
+
+                            <input type="radio" class="btn-check" name="filter" id="pending">
+                            <label class="btn btn-outline-secondary" for="pending">Pending</label>
+
+                            <input type="radio" class="btn-check" name="filter" id="inprogress">
+                            <label class="btn btn-outline-secondary" for="inprogress">In Progress</label>
+
+                            <input type="radio" class="btn-check" name="filter" id="resolved">
+                            <label class="btn btn-outline-secondary" for="resolved">Resolved</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    {% if complaints %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr class="border-bottom">
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Reported By</th>
+                                    <th>Category</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for complaint in complaints %}
+                                <tr>
+                                    <td class="small text-muted">#{{ complaint.id }}</td>
+                                    <td class="fw-bold">{{ complaint.title }}</td>
+                                    <td>{{ complaint.user.first_name|default:complaint.user.username }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ complaint.category }}</span>
+                                    </td>
+                                    <td>
+                                        {% if complaint.status == "Pending" %}
+                                        <span class="badge bg-warning">⏳ Pending</span>
+                                        {% elif complaint.status == "In Progress" %}
+                                        <span class="badge bg-info">🔄 In Progress</span>
+                                        {% elif complaint.status == "Resolved" %}
+                                        <span class="badge bg-success">✓ Resolved</span>
+                                        {% elif complaint.status == "Rejected" %}
+                                        <span class="badge bg-danger">✗ Rejected</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-muted small">{{ complaint.created_at|date:"M d" }}</td>
+                                    <td>
+                                        <a href="/admin-complaint/{{ complaint.id }}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        No complaints found.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Filter by Category -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-filter"></i> By Category
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between">
+                            <span>Waste Management</span>
+                            <span class="badge bg-primary">{{ waste_count }}</span>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between">
+                            <span>Parking Issues</span>
+                            <span class="badge bg-primary">{{ parking_count }}</span>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between">
+                            <span>Infrastructure</span>
+                            <span class="badge bg-primary">{{ infra_count }}</span>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between">
+                            <span>Security</span>
+                            <span class="badge bg-primary">{{ security_count }}</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assign Staff -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-user-tie"></i> Assign to Staff
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="/admin-assign">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <select name="staff" class="form-select form-select-sm">
+                                <option>-- Select Staff Member --</option>
+                                <option>Security Team</option>
+                                <option>Cleaning Department</option>
+                                <option>Maintenance Team</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-primary w-100">
+                            <i class="fas fa-check"></i> Assign
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-history"></i> Recent Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item small mb-3">
+                            <span class="badge bg-success">✓</span>
+                            <span class="text-muted">Issue #127 resolved</span>
+                            <br><small class="text-muted">2 hours ago</small>
+                        </div>
+                        <div class="timeline-item small mb-3">
+                            <span class="badge bg-info">📝</span>
+                            <span class="text-muted">Issue #126 status updated</span>
+                            <br><small class="text-muted">4 hours ago</small>
+                        </div>
+                        <div class="timeline-item small">
+                            <span class="badge bg-warning">⏳</span>
+                            <span class="text-muted">New issue #125 reported</span>
+                            <br><small class="text-muted">6 hours ago</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bg-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .timeline-item {
+        display: flex;
+        gap: 10px;
+        padding: 10px;
+        border-left: 2px solid #e0e0e0;
+        padding-left: 15px;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+</style>
+{% endblock %}

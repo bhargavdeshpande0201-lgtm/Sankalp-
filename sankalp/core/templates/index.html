@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - SANKALP{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section text-white py-md-5 py-4">
+    <div class="container text-center">
+        <div class="row align-items-center min-vh-75">
+            <div class="col-12">
+                <div class="hero-content">
+                    <div class="logo-hero mb-4">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h1 class="hero-title mb-3">
+                        SANKALP
+                    </h1>
+                    <p class="hero-subtitle mb-5">Smart Clean & Secure Campus Management System</p>
+        
+                    <div class="hero-buttons">
+                        {% if user.is_authenticated %}
+                            <a href="/dashboard" class="btn btn-light btn-lg me-3 shadow-sm">
+                                <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                            </a>
+                        {% else %}
+                            <a href="/register" class="btn btn-light btn-lg me-3 shadow-sm">
+                                <i class="fas fa-user-plus"></i> Get Started
+                            </a>
+                            <a href="/login" class="btn btn-outline-light btn-lg shadow-sm">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5 fw-bold">Why SANKALP?</h2>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card text-center shadow-sm h-100 border-0">
+                    <div class="card-body">
+                        <i class="fas fa-report-problem fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Easy Reporting</h5>
+                        <p class="card-text">Report campus issues like waste, parking, and security problems with just a few clicks.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card text-center shadow-sm h-100 border-0">
+                    <div class="card-body">
+                        <i class="fas fa-bell fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Real-time Tracking</h5>
+                        <p class="card-text">Track your complaints in real-time and receive updates on issue resolution.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card text-center shadow-sm h-100 border-0">
+                    <div class="card-body">
+                        <i class="fas fa-shield-alt fa-3x text-danger mb-3"></i>
+                        <h5 class="card-title">Secure & Safe</h5>
+                        <p class="card-text">Your data is secure with role-based access control and encrypted authentication.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Section -->
+{% if stats %}
+<div class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5 fw-bold">Campus Statistics</h2>
+        
+        <div class="row text-center">
+            <div class="col-md-3 mb-4">
+                <div class="stat-card">
+                    <h3 class="text-primary fw-bold">{{ stats.total_complaints }}</h3>
+                    <p class="text-muted">Total Complaints</p>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="stat-card">
+                    <h3 class="text-warning fw-bold">{{ stats.pending_complaints }}</h3>
+                    <p class="text-muted">Pending</p>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="stat-card">
+                    <h3 class="text-info fw-bold">{{ stats.in_progress }}</h3>
+                    <p class="text-muted">In Progress</p>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="stat-card">
+                    <h3 class="text-success fw-bold">{{ stats.resolved }}</h3>
+                    <p class="text-muted">Resolved</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- CTA Section -->
+<div class="bg-primary text-white py-5">
+    <div class="container text-center">
+        <h2 class="mb-3">Help Keep Our Campus Clean & Secure</h2>
+        <p class="lead mb-4">Report issues now and contribute to a better campus environment</p>
+        {% if user.is_authenticated %}
+            <a href="/add-complaint" class="btn btn-light btn-lg">
+                <i class="fas fa-plus-circle"></i> Report an Issue
+            </a>
+        {% else %}
+            <a href="/register" class="btn btn-light btn-lg">
+                <i class="fas fa-user-plus"></i> Join Now
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 400px;
+        display: flex;
+        align-items: center;
+    }
+
+    .stat-card {
+        padding: 30px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        transition: transform 0.3s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}

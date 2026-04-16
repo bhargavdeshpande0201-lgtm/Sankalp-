@@ -1,0 +1,347 @@
+{% extends 'base.html' %}
+
+{% block title %}Report Issue - SANKALP{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-primary text-white p-4">
+                    <h2 class="mb-0">
+                        <i class="fas fa-file-alt"></i> Report Campus Issue
+                    </h2>
+                    <p class="text-white-50 mb-0 mt-1">Help us maintain a clean and secure campus</p>
+                </div>
+
+                <div class="card-body p-4">
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate id="complaintForm">
+                        {% csrf_token %}
+
+                        <!-- Issue Title -->
+                        <div class="mb-4">
+                            <label for="id_title" class="form-label fw-bold">
+                                <i class="fas fa-heading"></i> Issue Title *
+                            </label>
+                            <input type="text" name="title" id="id_title" class="form-control" placeholder="Brief title of the issue" required>
+                            <small class="form-text text-muted d-block mt-1">Brief title of the issue (e.g., "Overflowing dustbin near main gate")</small>
+                            {% if form.title.errors %}
+                            <div class="invalid-feedback d-block text-danger">
+                                {% for error in form.title.errors %}{{ error }}<br>{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Category Selection -->
+                        <div class="mb-4">
+                            <label for="id_category" class="form-label fw-bold">
+                                <i class="fas fa-folder"></i> Category *
+                            </label>
+                            <select name="category" id="id_category" class="form-select" required>
+                                <option value="">-- Select a Category --</option>
+                                <option value="Waste">Waste Management</option>
+                                <option value="Parking">Parking Issues</option>
+                                <option value="Infrastructure">Infrastructure Damage</option>
+                                <option value="Security">Security Incident</option>
+                            </select>
+                            <small class="form-text text-muted d-block mt-1">Select the type of issue you're reporting</small>
+                            {% if form.category.errors %}
+                            <div class="invalid-feedback d-block text-danger">
+                                {% for error in form.category.errors %}{{ error }}<br>{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-4">
+                            <label for="id_description" class="form-label fw-bold">
+                                <i class="fas fa-align-left"></i> Description *
+                            </label>
+                            <textarea name="description" id="id_description" class="form-control" rows="6" placeholder="Provide detailed information about the issue" required></textarea>
+                            <small class="form-text text-muted d-block mt-1">Provide detailed information about the issue (minimum 20 characters)</small>
+                            {% if form.description.errors %}
+                            <div class="invalid-feedback d-block text-danger">
+                                {% for error in form.description.errors %}{{ error }}<br>{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Location -->
+                        <div class="mb-4">
+                            <label for="id_location" class="form-label fw-bold">
+                                <i class="fas fa-map-marker-alt"></i> Location *
+                            </label>
+                            <input type="text" name="location" id="id_location" class="form-control" placeholder="e.g., Main Gate, Building A, etc." required>
+                            <small class="form-text text-muted d-block mt-1">Where is this issue located?</small>
+                            {% if form.location.errors %}
+                            <div class="invalid-feedback d-block text-danger">
+                                {% for error in form.location.errors %}{{ error }}<br>{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Image Upload -->
+                        <div class="mb-4">
+                            <label for="id_image" class="form-label fw-bold">
+                                <i class="fas fa-image"></i> Upload Image (Optional)
+                            </label>
+                            <div class="form-control-plaintext border-2 border-dashed p-4 text-center" id="imageDropZone" style="cursor: pointer; transition: all 0.3s;">
+                                <input type="file" name="image" id="id_image" accept="image/*" style="display: none;">
+                                <p class="mb-0 text-muted">
+                                    <i class="fas fa-cloud-upload-alt fa-2x mb-2 d-block"></i>
+                                    Drag & drop an image here or click to select<br>
+                                    <small>(JPG, PNG, GIF, WebP - Max 5MB)</small>
+                                </p>
+                            </div>
+                            <div id="imagePreview" class="mt-3"></div>
+                            <small class="form-text text-muted d-block mt-1">A clear photo helps in faster resolution</small>
+                            {% if form.image.errors %}
+                            <div class="invalid-feedback d-block text-danger">
+                                {% for error in form.image.errors %}{{ error }}<br>{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Priority Level -->
+                        <div class="mb-4">
+                            <label for="id_priority" class="form-label fw-bold">
+                                <i class="fas fa-exclamation-triangle"></i> Priority
+                            </label>
+                            <select name="priority" id="id_priority" class="form-select">
+                                <option value="low">Low - Can wait</option>
+                                <option value="medium" selected>Medium - Should be addressed</option>
+                                <option value="high">High - Urgent</option>
+                            </select>
+                            <small class="form-text text-muted d-block mt-1">How urgent is this issue?</small>
+                        </div>
+
+                        <!-- Anonymous Reporting -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="id_anonymous" name="anonymous" value="on">
+                                <label class="form-check-label" for="id_anonymous">
+                                    <i class="fas fa-mask"></i> Report anonymously (Your name won't be displayed)
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Terms -->
+                        <div class="alert alert-light border">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i>
+                                By submitting this complaint, you agree that the information provided is accurate and true. False reports may result in account suspension.
+                            </small>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-grid gap-2 d-sm-flex justify-content-center">
+                            <button type="submit" class="btn btn-primary btn-lg w-100 w-sm-auto fw-bold">
+                                <i class="fas fa-paper-plane"></i> Submit Complaint
+                            </button>
+                            <a href="/dashboard" class="btn btn-secondary btn-lg w-100 w-sm-auto fw-bold">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Card -->
+            <div class="card mt-4 border-0 bg-light">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-lightbulb text-warning"></i> Tips for Effective Reporting
+                    </h6>
+                    <ul class="small mb-0">
+                        <li>Be specific about the location and what exactly is wrong</li>
+                        <li>Upload a clear photo if possible - it helps faster resolution</li>
+                        <li>Use simple language to describe the issue</li>
+                        <li>Check back on your dashboard to track the status</li>
+                        <li>Allow 24-48 hours for initial response</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Form Control Styling */
+    .form-control, .form-select {
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        border: 1px solid #dee2e6;
+        font-size: 1rem;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        outline: none;
+    }
+
+    /* Textarea specific */
+    textarea.form-control {
+        min-height: 150px;
+        resize: vertical;
+        overflow-y: auto;
+        padding: 0.75rem;
+    }
+
+    /* Input field styling */
+    .form-control::placeholder {
+        color: #6b7280;
+        font-size: 0.95rem;
+    }
+
+    /* Image upload zone */
+    #id_image {
+        display: none;
+    }
+
+    .border-dashed {
+        border: 2px dashed #dee2e6 !important;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background-color: #f9fafb;
+    }
+
+    .border-dashed:hover {
+        background-color: #f0f0f0;
+        border-color: #667eea !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+    }
+
+    .border-dashed.dragover {
+        background-color: #e8e9ff;
+        border-color: #667eea !important;
+    }
+
+    /* Form validation */
+    .invalid-feedback {
+        display: block;
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border-color: #dc3545;
+    }
+
+    /* Labels */
+    .form-label {
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+
+    /* Help text */
+    .form-text {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+    /* Card styling */
+    .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+
+    /* Submit button */
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:active {
+        transform: translateY(0);
+    }
+
+    /* Image preview */
+    #imagePreview img {
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+        object-fit: cover;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Image preview
+    document.getElementById('id_image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('imagePreview').innerHTML = `
+                    <div class="position-relative">
+                        <img src="${event.target.result}" class="img-fluid rounded" style="max-height: 200px;">
+                        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0" onclick="document.getElementById('id_image').value=''; this.parentElement.remove();">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Drag and drop
+    const dropZone = document.getElementById('imageDropZone');
+    const fileInput = document.getElementById('id_image');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+            dropZone.style.backgroundColor = '#f0f0f0';
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+            dropZone.style.backgroundColor = 'transparent';
+        }, false);
+    });
+
+    dropZone.addEventListener('drop', handleDrop, false);
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        fileInput.files = files;
+        fileInput.dispatchEvent(new Event('change'));
+    }
+</script>
+{% endblock %}

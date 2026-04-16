@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Complaints - SANKALP{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Search Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 fw-bold">
+                <i class="fas fa-search"></i> Search Results
+            </h1>
+            <p class="text-muted">Found {{ complaints|length }} complaint(s)</p>
+        </div>
+        <div class="col-md-4">
+            <a href="/dashboard" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Search Term</label>
+                    <input type="text" class="form-control form-input" name="q" value="{{ query }}" placeholder="Search...">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Category</label>
+                    <select class="form-select form-input" name="category">
+                        <option value="">All Categories</option>
+                        <option value="Cleanliness" {% if category == 'Cleanliness' %}selected{% endif %}>Cleanliness</option>
+                        <option value="Maintenance" {% if category == 'Maintenance' %}selected{% endif %}>Maintenance</option>
+                        <option value="Security" {% if category == 'Security' %}selected{% endif %}>Security</option>
+                        <option value="Other" {% if category == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select form-input" name="status">
+                        <option value="">All Status</option>
+                        <option value="Pending" {% if status == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="In Progress" {% if status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                        <option value="Resolved" {% if status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary-gradient w-100">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results -->
+    {% if complaints %}
+    <div class="row">
+        {% for complaint in complaints %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card shadow-sm border-0 h-100 complaint-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title fw-bold">{{ complaint.title|truncatewords:5 }}</h5>
+                        <small class="text-muted">#{{ complaint.id }}</small>
+                    </div>
+
+                    <p class="card-text text-muted small" style="height: 50px; overflow: hidden;">
+                        {{ complaint.description|truncatewords:20 }}
+                    </p>
+
+                    <div class="mb-3">
+                        <span class="badge bg-light text-dark">{{ complaint.category }}</span>
+                        {% if complaint.status == 'Pending' %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% elif complaint.status == 'In Progress' %}
+                            <span class="badge bg-info">In Progress</span>
+                        {% elif complaint.status == 'Resolved' %}
+                            <span class="badge bg-success">Resolved</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">{{ complaint.created_at|date:"M d, Y" }}</small>
+                        <a href="/complaint/{{ complaint.id }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center py-5">
+        <i class="fas fa-inbox fa-3x mb-3"></i>
+        <h5 class="mb-2">No Complaints Found</h5>
+        <p class="text-muted mb-3">Try adjusting your search filters or create a new complaint</p>
+        <a href="/dashboard" class="btn btn-primary-gradient">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .complaint-card {
+        transition: all 0.3s ease;
+    }
+
+    .complaint-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15) !important;
+    }
+</style>
+{% endblock %}

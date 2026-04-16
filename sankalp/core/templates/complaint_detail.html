@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+
+{% block title %}Complaint Details - SANKALP{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Complaint Details Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 fw-bold">
+                        <i class="fas fa-file-alt"></i> Complaint #{{ complaint.id }}
+                    </h4>
+                    <span class="badge bg-secondary">{{ complaint.category }}</span>
+                </div>
+
+                <div class="card-body">
+                    <!-- Title -->
+                    <h2 class="mb-3">{{ complaint.title }}</h2>
+
+                    <!-- Status Badge -->
+                    <div class="mb-4">
+                        <p class="text-muted mb-2">Status:</p>
+                        {% if complaint.status == "Pending" %}
+                        <span class="badge bg-warning p-2">⏳ Pending - Awaiting Review</span>
+                        {% elif complaint.status == "In Progress" %}
+                        <span class="badge bg-info p-2">🔄 In Progress - Being Handled</span>
+                        {% elif complaint.status == "Resolved" %}
+                        <span class="badge bg-success p-2">✓ Resolved - Issue Fixed</span>
+                        {% elif complaint.status == "Rejected" %}
+                        <span class="badge bg-danger p-2">✗ Rejected - Cannot Address</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Complaint Details Grid -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <p class="text-muted small mb-1">Reported By:</p>
+                            <p class="fw-bold">{{ complaint.user.get_full_name|default:complaint.user.username }}</p>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <p class="text-muted small mb-1">Submitted On:</p>
+                            <p class="fw-bold">{{ complaint.created_at|date:"M d, Y \a\t g:i A" }}</p>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <p class="text-muted small mb-1">Location:</p>
+                            <p class="fw-bold">
+                                <i class="fas fa-map-marker-alt text-danger"></i>
+                                {{ complaint.location|default:"Not specified" }}
+                            </p>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <p class="text-muted small mb-1">Category:</p>
+                            <p class="fw-bold">{{ complaint.category }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold">Description</h5>
+                        <p class="text-muted">{{ complaint.description }}</p>
+                    </div>
+
+                    <!-- Image (if exists) -->
+                    {% if complaint.image %}
+                    <div class="mb-4">
+                        <h5 class="fw-bold">Attached Image</h5>
+                        <img src="{{ complaint.image.url }}" class="img-fluid rounded" style="max-width: 100%; max-height: 400px;">
+                    </div>
+                    {% endif %}
+
+                    <!-- Additional Info -->
+                    <div class="alert alert-light border">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i>
+                            Last updated: {{ complaint.updated_at|date:"M d, Y \a\t g:i A" }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Update Status Card (for admin/staff only) -->
+            {% if user.is_staff or user == complaint.user %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-edit"></i> Update Status
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <form method="POST" action="/complaint/{{ complaint.id }}/update-status/">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="status" class="form-label fw-bold">New Status:</label>
+                            <select name="status" id="status" class="form-select" required>
+                                <option value="">-- Select Status --</option>
+                                <option value="Pending" {% if complaint.status == "Pending" %}selected{% endif %}>Pending</option>
+                                <option value="In Progress" {% if complaint.status == "In Progress" %}selected{% endif %}>In Progress</option>
+                                <option value="Resolved" {% if complaint.status == "Resolved" %}selected{% endif %}>Resolved</option>
+                                <option value="Rejected" {% if complaint.status == "Rejected" %}selected{% endif %}>Rejected</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="comment" class="form-label fw-bold">Add Comment (Optional):</label>
+                            <textarea name="comment" id="comment" class="form-control" rows="3" placeholder="Update about the complaint resolution..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-check"></i> Update Status
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Comments Section -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-comments"></i> Comments & Updates
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    {% if comments %}
+                    <div class="comments-section">
+                        {% for comment in comments %}
+                        <div class="comment mb-3 pb-3 border-bottom">
+                            <div class="d-flex mb-2">
+                                <div>
+                                    <p class="mb-1 fw-bold">
+                                        <i class="fas fa-user-circle"></i> 
+                                        {{ comment.user.get_full_name|default:comment.user.username }}
+                                    </p>
+                                    <small class="text-muted">{{ comment.created_at|date:"M d, Y \a\t g:i A" }}</small>
+                                </div>
+                                {% if comment.is_staff %}
+                                <span class="badge bg-primary ms-auto">Staff</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-muted mb-0">{{ comment.text }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-4">No comments yet. Check back for updates.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-bolt"></i> Quick Actions
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if user == complaint.user %}
+                        <a href="/complaints" class="btn btn-outline-primary">
+                            <i class="fas fa-list"></i> Back to My Complaints
+                        </a>
+                        <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="fas fa-trash"></i> Delete Complaint
+                        </button>
+                        {% elif user.is_staff %}
+                        <a href="/admin-dashboard" class="btn btn-outline-primary">
+                            <i class="fas fa-cogs"></i> Back to Dashboard
+                        </a>
+                        <button class="btn btn-outline-warning" onclick="assignToStaff()">
+                            <i class="fas fa-user-tie"></i> Assign to Staff
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Timeline -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-timeline"></i> Status Timeline
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item mb-3">
+                            <span class="badge bg-info">📝</span>
+                            <p class="mb-0 ms-2">
+                                <small class="text-muted">Complaint Submitted</small>
+                                <br><small class="text-muted">{{ complaint.created_at|date:"M d, Y" }}</small>
+                            </p>
+                        </div>
+
+                        {% if complaint.updated_at != complaint.created_at %}
+                        <div class="timeline-item mb-3">
+                            <span class="badge bg-warning">⏳</span>
+                            <p class="mb-0 ms-2">
+                                <small class="text-muted">Last Updated</small>
+                                <br><small class="text-muted">{{ complaint.updated_at|date:"M d, Y" }}</small>
+                            </p>
+                        </div>
+                        {% endif %}
+
+                        {% if complaint.status == "Resolved" or complaint.status == "Rejected" %}
+                        <div class="timeline-item">
+                            <span class="badge {% if complaint.status == "Resolved" %}bg-success{% else %}bg-danger{% endif %}">
+                                {% if complaint.status == "Resolved" %}✓{% else %}✗{% endif %}
+                            </span>
+                            <p class="mb-0 ms-2">
+                                <small class="text-muted">{{ complaint.status }}</small>
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support Info -->
+            <div class="alert alert-info border-0">
+                <h6 class="fw-bold mb-2">
+                    <i class="fas fa-info-circle"></i> Need Help?
+                </h6>
+                <p class="small mb-2">For urgent matters, contact the campus administration office.</p>
+                <a href="/contact" class="btn btn-sm btn-info w-100">
+                    <i class="fas fa-phone"></i> Contact Support
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Complaint</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this complaint? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="/complaint/{{ complaint.id }}/delete/" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 7px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: #e5e7eb;
+    }
+
+    .timeline-item {
+        position: relative;
+    }
+
+    .timeline-item .badge {
+        position: absolute;
+        left: -37px;
+        top: 0;
+        z-index: 1;
+    }
+
+    .comment {
+        padding: 1rem;
+        background-color: #f9fafb;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+
+    .comment:hover {
+        background-color: #f3f4f6;
+    }
+
+    .comments-section {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function assignToStaff() {
+        alert('Assign to staff functionality coming soon!');
+    }
+</script>
+{% endblock %}
