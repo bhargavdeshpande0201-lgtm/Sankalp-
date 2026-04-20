@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Users - SANKALP{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    {% if not user.is_staff %}
+    <div class="alert alert-danger">
+        <i class="fas fa-lock"></i> Access Denied. Admin privileges required.
+    </div>
+    {% else %}
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="fw-bold">
+                <i class="fas fa-users"></i> Manage Users
+            </h1>
+            <p class="text-muted">User management and administration</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Total Users</p>
+                            <h3 class="fw-bold mb-0">{{ total_users }}</h3>
+                        </div>
+                        <i class="fas fa-users fa-2x text-primary opacity-30"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Staff Members</p>
+                            <h3 class="fw-bold text-info mb-0">{{ staff_count }}</h3>
+                        </div>
+                        <i class="fas fa-user-tie fa-2x text-info opacity-30"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Students</p>
+                            <h3 class="fw-bold text-success mb-0">{{ student_count }}</h3>
+                        </div>
+                        <i class="fas fa-graduation-cap fa-2x text-success opacity-30"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Administrators</p>
+                            <h3 class="fw-bold text-warning mb-0">{{ admin_count }}</h3>
+                        </div>
+                        <i class="fas fa-shield-alt fa-2x text-warning opacity-30"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="btn-group" role="group">
+                <a href="?type=" class="btn btn-outline-primary {% if not user_type %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Users
+                </a>
+                <a href="?type=staff" class="btn btn-outline-info {% if user_type == 'staff' %}active{% endif %}">
+                    <i class="fas fa-user-tie"></i> Staff
+                </a>
+                <a href="?type=students" class="btn btn-outline-success {% if user_type == 'students' %}active{% endif %}">
+                    <i class="fas fa-graduation-cap"></i> Students
+                </a>
+                <a href="?type=admin" class="btn btn-outline-warning {% if user_type == 'admin' %}active{% endif %}">
+                    <i class="fas fa-shield-alt"></i> Admins
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom p-4">
+            <h5 class="mb-0 fw-bold">
+                {% if user_type == 'staff' %}
+                    Staff Members
+                {% elif user_type == 'students' %}
+                    Student Users
+                {% elif user_type == 'admin' %}
+                    Administrator Users
+                {% else %}
+                    All Users
+                {% endif %}
+            </h5>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 25%">Name / Username</th>
+                            <th style="width: 25%">Email</th>
+                            <th style="width: 15%">Role</th>
+                            <th style="width: 15%">Joined</th>
+                            <th style="width: 20%">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar me-2" style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                        {{ user.first_name|first|default:user.username|first|upper }}
+                                    </div>
+                                    <div>
+                                        <p class="mb-0 fw-bold">{{ user.get_full_name|default:user.username }}</p>
+                                        <small class="text-muted">@{{ user.username }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <a href="mailto:{{ user.email }}" class="text-decoration-none">
+                                    {{ user.email }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if user.is_superuser %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-crown"></i> Admin
+                                    </span>
+                                {% elif user.is_staff %}
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-user-tie"></i> Staff
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-user"></i> Student
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    {{ user.date_joined|date:"M d, Y" }}
+                                </small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="#" class="btn btn-outline-primary" title="View Profile">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-outline-warning" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% if not user.is_superuser %}
+                                    <a href="#" class="btn btn-outline-danger" title="Deactivate">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                <i class="fas fa-inbox fa-2x mb-2 d-block opacity-50"></i>
+                                No users found
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Page navigation" class="mb-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1">First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% endif %}
+</div>
+{% endblock %}

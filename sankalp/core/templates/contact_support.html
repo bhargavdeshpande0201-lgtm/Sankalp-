@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact & Support - SANKALP{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="row mb-5">
+        <div class="col-lg-12">
+            <div class="text-center mb-4">
+                <h1 class="fw-bold mb-3">
+                    <i class="fas fa-headset"></i> Contact & Support
+                </h1>
+                <p class="text-muted fs-5">We're here to help! Get in touch with our support team</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support Contacts -->
+    <div class="row mb-5">
+        {% for contact in support_contacts %}
+        <div class="col-lg-6 col-md-12 mb-4">
+            <div class="card border-0 shadow-lg h-100 contact-card">
+                <div class="card-body p-4">
+                    <!-- Contact Name -->
+                    <div class="d-flex align-items-start mb-4">
+                        <div class="contact-avatar me-3">
+                            <i class="fas fa-user-circle fa-3x text-primary"></i>
+                        </div>
+                        <div>
+                            <h4 class="card-title mb-1">{{ contact.name }}</h4>
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-briefcase"></i> {{ contact.role }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Contact Details -->
+                    <div class="contact-details">
+                        <!-- Email -->
+                        <div class="mb-3 pb-3 border-bottom">
+                            <label class="text-muted small fw-bold d-block mb-1">
+                                <i class="fas fa-envelope"></i> Email
+                            </label>
+                            <a href="mailto:{{ contact.email }}" class="text-decoration-none">
+                                {{ contact.email }}
+                            </a>
+                        </div>
+
+                        <!-- Mobile -->
+                        <div class="mb-3 pb-3 border-bottom">
+                            <label class="text-muted small fw-bold d-block mb-1">
+                                <i class="fas fa-phone"></i> Mobile
+                            </label>
+                            <a href="tel:{{ contact.mobile }}" class="text-decoration-none">
+                                {{ contact.mobile }}
+                            </a>
+                        </div>
+
+                        <!-- Availability -->
+                        <div class="mb-3">
+                            <label class="text-muted small fw-bold d-block mb-1">
+                                <i class="fas fa-clock"></i> Availability
+                            </label>
+                            <p class="mb-0">{{ contact.availability }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="mailto:{{ contact.email }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-envelope"></i> Send Email
+                        </a>
+                        <a href="tel:{{ contact.mobile }}" class="btn btn-success btn-sm">
+                            <i class="fas fa-phone"></i> Call Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- General Support Information -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light p-4">
+                    <h4 class="mb-0">
+                        <i class="fas fa-question-circle"></i> General Support Information
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        <!-- Response Time -->
+                        <div class="col-md-4 mb-4">
+                            <div class="text-center">
+                                <i class="fas fa-bolt text-warning fa-2x mb-3 d-block"></i>
+                                <h5 class="fw-bold">Quick Response</h5>
+                                <p class="text-muted">We aim to respond to all support requests within 24 hours</p>
+                            </div>
+                        </div>
+
+                        <!-- Availability -->
+                        <div class="col-md-4 mb-4">
+                            <div class="text-center">
+                                <i class="fas fa-calendar-check text-info fa-2x mb-3 d-block"></i>
+                                <h5 class="fw-bold">Available Daily</h5>
+                                <p class="text-muted">Support available Monday to Friday, 9 AM to 6 PM IST</p>
+                            </div>
+                        </div>
+
+                        <!-- Multiple Channels -->
+                        <div class="col-md-4 mb-4">
+                            <div class="text-center">
+                                <i class="fas fa-inbox text-success fa-2x mb-3 d-block"></i>
+                                <h5 class="fw-bold">Multiple Channels</h5>
+                                <p class="text-muted">Reach us via email, phone, or through the system directly</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light p-4">
+                    <h4 class="mb-0">
+                        <i class="fas fa-book"></i> Frequently Asked Questions
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item border-0 mb-3">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                    How do I submit a complaint?
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Login to your SANKALP account, click on "Report Issue" and fill in the complaint form with details about the issue you want to report. Attach supporting images if available.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item border-0 mb-3">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                    Can I submit complaints anonymously?
+                                </button>
+                            </h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Yes, SANKALP supports anonymous reporting. You can check the "Report Anonymously" option when submitting a complaint. However, the administration may need to contact you for further details.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item border-0 mb-3">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                    How long does it take to resolve a complaint?
+                                </button>
+                            </h2>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Resolution time varies depending on the nature of the issue. Most complaints are resolved within 7-14 days. You can track the status of your complaint in your dashboard.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item border-0 mb-3">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                    What types of issues can I report?
+                                </button>
+                            </h2>
+                            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    You can report issues related to:
+                                    <ul class="mb-0 mt-2">
+                                        <li>Waste Management</li>
+                                        <li>Parking Issues</li>
+                                        <li>Infrastructure Damage</li>
+                                        <li>Security Incidents</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item border-0">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                                    Can I delete my complaint?
+                                </button>
+                            </h2>
+                            <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    You can delete pending complaints. However, complaints that are under review or resolved cannot be deleted without administrator approval. Contact support if you need assistance.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Form -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light p-4">
+                    <h4 class="mb-0">
+                        <i class="fas fa-envelope"></i> Send us a Message
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form action="mailto:support@sankalp.edu.in" method="POST" enctype="text/plain">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Your Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="subject" name="subject" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .contact-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .contact-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .accordion-button:not(.collapsed) {
+        background-color: #f8f9fa;
+        color: #0d6efd;
+        font-weight: 500;
+    }
+
+    .accordion-button:focus {
+        box-shadow: none;
+        border-color: #0d6efd;
+    }
+</style>
+{% endblock %}

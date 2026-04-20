@@ -11,19 +11,24 @@
     {% else %}
 
     <div class="row mb-4">
-        <div class="col-md-8">
+        <div class="col-md-6">
             <h1 class="fw-bold">
                 <i class="fas fa-cogs"></i> Admin Dashboard
             </h1>
             <p class="text-muted">Campus Management Control Panel</p>
         </div>
-        <div class="col-md-4 text-end">
-            <a href="/admin-users" class="btn btn-outline-primary me-2">
-                <i class="fas fa-users"></i> Manage Users
-            </a>
-            <a href="/admin-reports" class="btn btn-outline-success">
-                <i class="fas fa-chart-bar"></i> Reports
-            </a>
+        <div class="col-md-6 text-end">
+            <div class="btn-group" role="group">
+                <a href="{% url 'admin_manage_users' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-users"></i> Manage Users
+                </a>
+                <a href="{% url 'admin_reports' %}" class="btn btn-outline-success">
+                    <i class="fas fa-chart-bar"></i> Reports
+                </a>
+                <a href="{% url 'admin_recent_activity' %}" class="btn btn-outline-info">
+                    <i class="fas fa-history"></i> Activity
+                </a>
+            </div>
         </div>
     </div>
 
@@ -65,7 +70,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <p class="text-muted small mb-1">Active Users</p>
-                            <h3 class="fw-bold text-info mb-0">{{ active_users }}</h3>
+                            <h3 class="fw-bold text-info mb-0">{{ users_count }}</h3>
                             <small class="text-muted">Registered</small>
                         </div>
                         <i class="fas fa-users fa-2x text-info opacity-30"></i>
@@ -100,19 +105,28 @@
                         <h5 class="mb-0 fw-bold">
                             <i class="fas fa-list"></i> All Complaints
                         </h5>
-                        <div class="btn-group btn-group-sm" role="group">
-                            <input type="radio" class="btn-check" name="filter" id="all" checked>
-                            <label class="btn btn-outline-secondary" for="all">All</label>
-
-                            <input type="radio" class="btn-check" name="filter" id="pending">
-                            <label class="btn btn-outline-secondary" for="pending">Pending</label>
-
-                            <input type="radio" class="btn-check" name="filter" id="inprogress">
-                            <label class="btn btn-outline-secondary" for="inprogress">In Progress</label>
-
-                            <input type="radio" class="btn-check" name="filter" id="resolved">
-                            <label class="btn btn-outline-secondary" for="resolved">Resolved</label>
-                        </div>
+                        <form method="GET" class="d-flex gap-2 align-items-center">
+                            <select name="status" class="form-select form-select-sm" style="width:130px;">
+                                <option value="">All Status</option>
+                                {% for val, label in status_choices %}
+                                <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <select name="category" class="form-select form-select-sm" style="width:140px;">
+                                <option value="">All Categories</option>
+                                {% for val, label in category_choices %}
+                                <option value="{{ val }}" {% if category_filter == val %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <select name="priority" class="form-select form-select-sm" style="width:120px;">
+                                <option value="">All Priority</option>
+                                {% for val, label in priority_choices %}
+                                <option value="{{ val }}" {% if priority_filter == val %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-filter"></i></button>
+                            <a href="{% url 'admin_dashboard' %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-times"></i></a>
+                        </form>
                     </div>
                 </div>
 
@@ -124,9 +138,10 @@
                                 <tr class="border-bottom">
                                     <th>ID</th>
                                     <th>Title</th>
-                                    <th>Reported By</th>
+                                    <th>Image</th>
                                     <th>Category</th>
                                     <th>Status</th>
+                                    <th>Priority</th>
                                     <th>Date</th>
                                     <th>Action</th>
                                 </tr>
@@ -135,10 +150,19 @@
                                 {% for complaint in complaints %}
                                 <tr>
                                     <td class="small text-muted">#{{ complaint.id }}</td>
-                                    <td class="fw-bold">{{ complaint.title }}</td>
-                                    <td>{{ complaint.user.first_name|default:complaint.user.username }}</td>
                                     <td>
-                                        <span class="badge bg-secondary">{{ complaint.category }}</span>
+                                        <div class="fw-bold">{{ complaint.title|truncatewords:3 }}</div>
+                                        <small class="text-muted">by {{ complaint.user.get_full_name|default:complaint.user.username }}</small>
+                                    </td>
+                                    <td>
+                                        {% if complaint.image %}
+                                            <img src="{{ complaint.image.url }}" alt="Complaint" style="height: 50px; width: 50px; object-fit: cover; border-radius: 4px;">
+                                        {% else %}
+                                            <span class="badge bg-secondary">No Image</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ complaint.get_category_display }}</span>
                                     </td>
                                     <td>
                                         {% if complaint.status == "Pending" %}
@@ -151,11 +175,28 @@
                                         <span class="badge bg-danger">✗ Rejected</span>
                                         {% endif %}
                                     </td>
+                                    <td>
+                                        {% if complaint.priority == "high" %}
+                                            <span class="badge bg-danger">High</span>
+                                        {% elif complaint.priority == "medium" %}
+                                            <span class="badge bg-warning">Medium</span>
+                                        {% else %}
+                                            <span class="badge bg-info">Low</span>
+                                        {% endif %}
+                                    </td>
                                     <td class="text-muted small">{{ complaint.created_at|date:"M d" }}</td>
                                     <td>
-                                        <a href="/admin-complaint/{{ complaint.id }}" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </a>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{% url 'admin_edit_complaint' complaint.id %}" class="btn btn-primary" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'assign_complaint' complaint.id %}" class="btn btn-info" title="Assign to Staff">
+                                                <i class="fas fa-user-check"></i>
+                                            </a>
+                                            <a href="{% url 'delete_complaint' complaint.id %}" class="btn btn-danger" title="Delete" onclick="return confirm('Delete this complaint?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -210,20 +251,10 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="/admin-assign">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <select name="staff" class="form-select form-select-sm">
-                                <option>-- Select Staff Member --</option>
-                                <option>Security Team</option>
-                                <option>Cleaning Department</option>
-                                <option>Maintenance Team</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-sm btn-primary w-100">
-                            <i class="fas fa-check"></i> Assign
-                        </button>
-                    </form>
+                    <p class="text-muted small mb-2">Click the <i class="fas fa-user-check"></i> icon next to any complaint to assign it to a staff member.</p>
+                    <a href="{% url 'admin_manage_users' %}?type=staff" class="btn btn-sm btn-outline-primary w-100">
+                        <i class="fas fa-users"></i> View Staff Members
+                    </a>
                 </div>
             </div>
 

@@ -107,6 +107,29 @@
                         <a href="/register" class="text-primary fw-bold">Sign up here</a>
                     </p>
 
+                    <!-- Forgot Password Link -->
+                    <p class="text-center text-muted">
+                        <a href="{% url 'forgot_password' %}" class="text-danger">
+                            <i class="fas fa-key"></i> Forgot Password?
+                        </a>
+                    </p>
+
+                    <!-- Resend Verification -->
+                    {% if unverified_email %}
+                    <div class="alert alert-warning mt-3">
+                        <p class="small mb-2">
+                            <i class="fas fa-envelope"></i> Didn't receive the verification email?
+                        </p>
+                        <form method="POST" action="{% url 'resend_verification' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="email" value="{{ unverified_email }}">
+                            <button type="submit" class="btn btn-warning btn-sm w-100">
+                                <i class="fas fa-redo"></i> Resend Verification Email
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+
                     <p class="text-center small text-muted mt-3">
                         <a href="/" class="text-muted">Back to Home</a>
                     </p>
@@ -116,10 +139,24 @@
             <!-- Info Card -->
             <div class="card mt-4 bg-light border-0">
                 <div class="card-body">
-                    <h6 class="fw-bold mb-2"><i class="fas fa-info-circle text-info"></i> Demo Credentials</h6>
-                    <p class="small mb-1"><strong>Student:</strong> student1 / password123</p>
-                    <p class="small mb-1"><strong>Admin:</strong> admin / password123</p>
-                    <p class="small text-muted">(For testing purposes)</p>
+                    <h6 class="fw-bold mb-3"><i class="fas fa-lightbulb text-warning"></i> Demo Credentials</h6>
+                    
+                    <div class="mb-2">
+                        <small class="fw-bold text-info">👤 Student Login:</small>
+                        <small class="d-block text-muted">Username: student1 | Password: Student123456</small>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <small class="fw-bold text-info">👨‍🏫 Staff Login:</small>
+                        <small class="d-block text-muted">Username: staff1 | Password: Staff123456</small>
+                    </div>
+                    
+                    <div>
+                        <small class="fw-bold text-info">👨‍💼 Admin Login:</small>
+                        <small class="d-block text-muted">Username: admin | Password: Admin123456</small>
+                    </div>
+                    
+                    <small class="text-muted d-block mt-3">(For testing purposes only)</small>
                 </div>
             </div>
         </div>

@@ -48,3 +48,53 @@ class UserRegistrationForm(forms.ModelForm):
             raise forms.ValidationError("Passwords do not match")
         
         return cleaned_data
+
+
+class PasswordResetRequestForm(forms.Form):
+    """Form for requesting password reset via email"""
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control form-control-lg',
+            'placeholder': 'Enter your registered email address',
+            'required': True
+        })
+    )
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if not User.objects.filter(email=email).exists():
+            raise forms.ValidationError('No account found with this email address.')
+        return email
+
+
+class PasswordResetForm(forms.Form):
+    """Form for resetting password with new password"""
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control form-control-lg',
+            'placeholder': 'New password (min 8 characters)',
+            'required': True
+        }),
+        min_length=8
+    )
+    password_confirm = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control form-control-lg',
+            'placeholder': 'Confirm password',
+            'required': True
+        }),
+        min_length=8
+    )
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        password_confirm = cleaned_data.get('password_confirm')
+        
+        if password != password_confirm:
+            raise forms.ValidationError("Passwords do not match!")
+        
+        if password and not any(char.isdigit() for char in password):
+            raise forms.ValidationError("Password must contain at least one number!")
+        
+        return cleaned_data

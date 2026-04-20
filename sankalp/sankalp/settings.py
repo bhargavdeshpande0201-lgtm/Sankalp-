@@ -114,3 +114,12 @@ LOGOUT_REDIRECT_URL = 'index'
 # File upload settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+
+# Email Configuration — Gmail SMTP
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'bhargavdeshpande0201@gmail.com'
+EMAIL_HOST_PASSWORD = 'ewso qsnh edsc cafa'
+DEFAULT_FROM_EMAIL = 'SANKALP Campus <bhargavdeshpande0201@gmail.com>'

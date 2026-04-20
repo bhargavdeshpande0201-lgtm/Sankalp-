@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Assign Complaint - SANKALP{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-primary text-white p-4">
+                    <h2 class="mb-0">
+                        <i class="fas fa-user-check"></i> Assign Complaint to Staff
+                    </h2>
+                    <p class="text-white-50 mb-0 mt-1">ID: #{{ complaint.id }}</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Complaint Summary -->
+                    <div class="alert alert-info mb-4">
+                        <h5 class="mb-2 fw-bold">{{ complaint.title }}</h5>
+                        <p class="mb-1"><strong>Category:</strong> {{ complaint.get_category_display }}</p>
+                        <p class="mb-0"><strong>Status:</strong> <span class="badge bg-warning">{{ complaint.status }}</span></p>
+                    </div>
+
+                    <!-- Assignment Form -->
+                    <form method="POST" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Current Assignment -->
+                        {% if complaint.assigned_to %}
+                        <div class="alert alert-success mb-4">
+                            <i class="fas fa-check-circle"></i> 
+                            <strong>Currently Assigned To:</strong> {{ complaint.assigned_to.get_full_name|default:complaint.assigned_to.username }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Staff Selection -->
+                        <div class="mb-4">
+                            <label for="assigned_to" class="form-label fw-bold">
+                                <i class="fas fa-people-arrows"></i> Assign To Staff Member *
+                            </label>
+                            <select name="assigned_to" id="assigned_to" class="form-select form-select-lg" required>
+                                <option value="">-- Select a Staff Member --</option>
+                                {% for staff in staff_members %}
+                                <option value="{{ staff.id }}" {% if complaint.assigned_to.id == staff.id %}selected{% endif %}>
+                                    {{ staff.get_full_name|default:staff.username }} ({{ staff.email }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted d-block mt-2">Select the staff member who will handle this complaint</small>
+                        </div>
+
+                        <!-- Comment -->
+                        <div class="mb-4">
+                            <label for="comment" class="form-label fw-bold">
+                                <i class="fas fa-comment"></i> Assignment Note (Optional)
+                            </label>
+                            <textarea name="comment" id="comment" class="form-control" rows="4" placeholder="Add any notes about this assignment..."></textarea>
+                            <small class="form-text text-muted d-block mt-2">This will be added as a comment on the complaint</small>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
+                                <i class="fas fa-check"></i> Assign Complaint
+                            </button>
+                            <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Complaint Details Card -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-light p-4">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-info-circle"></i> Complaint Details
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <dl class="row">
+                        <dt class="col-sm-4">Reported By:</dt>
+                        <dd class="col-sm-8">{{ complaint.user.get_full_name|default:complaint.user.username }}</dd>
+
+                        <dt class="col-sm-4">Location:</dt>
+                        <dd class="col-sm-8">{{ complaint.location }}</dd>
+
+                        <dt class="col-sm-4">Priority:</dt>
+                        <dd class="col-sm-8">
+                            {% if complaint.priority == 'high' %}
+                                <span class="badge bg-danger">{{ complaint.get_priority_display }}</span>
+                            {% elif complaint.priority == 'medium' %}
+                                <span class="badge bg-warning">{{ complaint.get_priority_display }}</span>
+                            {% else %}
+                                <span class="badge bg-info">{{ complaint.get_priority_display }}</span>
+                            {% endif %}
+                        </dd>
+
+                        <dt class="col-sm-4">Submitted:</dt>
+                        <dd class="col-sm-8">{{ complaint.created_at|date:"M d, Y H:i" }}</dd>
+
+                        <dt class="col-sm-4">Last Updated:</dt>
+                        <dd class="col-sm-8">{{ complaint.updated_at|date:"M d, Y H:i" }}</dd>
+                    </dl>
+
+                    <!-- Description -->
+                    <div class="mt-4">
+                        <h6 class="fw-bold mb-2">Description:</h6>
+                        <p class="text-muted">{{ complaint.description }}</p>
+                    </div>
+
+                    <!-- Image -->
+                    {% if complaint.image %}
+                    <div class="mt-4">
+                        <h6 class="fw-bold mb-2">Attached Image:</h6>
+                        <img src="{{ complaint.image.url }}" alt="Complaint Image" class="img-fluid rounded" style="max-height: 300px;">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.needs-validation');
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    }, false);
+});
+</script>
+{% endblock %}

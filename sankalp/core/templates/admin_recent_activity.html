@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block title %}Recent Activity - SANKALP{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    {% if not user.is_staff %}
+    <div class="alert alert-danger">
+        <i class="fas fa-lock"></i> Access Denied. Admin privileges required.
+    </div>
+    {% else %}
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="fw-bold">
+                <i class="fas fa-history"></i> Recent Activity
+            </h1>
+            <p class="text-muted">Latest system activity and updates</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light p-4">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-clipboard-list"></i> Recent Complaints
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for complaint in recent_complaints %}
+                        <div class="list-group-item p-4 border-bottom">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-start">
+                                        <div class="me-3">
+                                            <i class="fas fa-bug fa-2x text-warning opacity-50"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="fw-bold mb-1">
+                                                {{ complaint.title }}
+                                                <span class="badge bg-secondary ms-2">ID: #{{ complaint.id }}</span>
+                                            </h6>
+                                            <p class="text-muted small mb-1">
+                                                <strong>{{ complaint.user.get_full_name|default:complaint.user.username }}</strong>
+                                                • {{ complaint.created_at|timesince }} ago
+                                            </p>
+                                            <p class="text-muted small mb-0">{{ complaint.description|truncatewords:15 }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <span class="badge bg-primary mb-2 d-inline-block">{{ complaint.get_category_display }}</span><br>
+                                    {% if complaint.status == 'Pending' %}
+                                        <span class="badge bg-warning mt-1">{{ complaint.status }}</span>
+                                    {% elif complaint.status == 'In Progress' %}
+                                        <span class="badge bg-info mt-1">{{ complaint.status }}</span>
+                                    {% elif complaint.status == 'Resolved' %}
+                                        <span class="badge bg-success mt-1">{{ complaint.status }}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger mt-1">{{ complaint.status }}</span>
+                                    {% endif %}
+                                    <br>
+                                    <a href="{% url 'admin_edit_complaint' complaint.id %}" class="btn btn-sm btn-outline-primary mt-2">
+                                        <i class="fas fa-edit"></i> View
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="list-group-item p-4 text-center text-muted">
+                            <i class="fas fa-inbox fa-2x mb-2 d-block opacity-50"></i>
+                            No complaints yet
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comments Feed -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light p-4">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-comments"></i> Recent Comments
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush" style="max-height: 600px; overflow-y: auto;">
+                        {% for comment in recent_comments %}
+                        <div class="list-group-item p-3 border-bottom">
+                            <div class="d-flex align-items-start">
+                                <div class="me-2">
+                                    <small class="badge bg-info">
+                                        {% if comment.is_staff %}
+                                            <i class="fas fa-user-tie"></i> Staff
+                                        {% else %}
+                                            <i class="fas fa-user"></i> User
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <p class="mb-1 small">
+                                        <strong>{{ comment.user.get_full_name|default:comment.user.username }}</strong>
+                                        <br>
+                                        <small class="text-muted">on Complaint #{{ comment.complaint.id }}</small>
+                                    </p>
+                                    <p class="mb-0 small text-muted">{{ comment.text|truncatewords:15 }}</p>
+                                    <small class="text-muted">{{ comment.created_at|timesince }} ago</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="list-group-item p-4 text-center text-muted">
+                            <i class="fas fa-comments fa-2x mb-2 d-block opacity-50"></i>
+                            <small>No comments yet</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Timeline (Alternative View) -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light p-4">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-stream"></i> Activity Timeline
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="timeline">
+                        {% for complaint in recent_complaints|slice:":5" %}
+                        <div class="timeline-item d-flex mb-4">
+                            <div class="timeline-marker">
+                                <div class="timeline-dot" style="background-color: #0d6efd;"></div>
+                            </div>
+                            <div class="timeline-content flex-grow-1 ms-3">
+                                <h6 class="fw-bold mb-1">New Complaint Submitted</h6>
+                                <p class="text-muted small mb-1">
+                                    <strong>{{ complaint.user.get_full_name|default:complaint.user.username }}</strong> 
+                                    submitted a complaint
+                                </p>
+                                <p class="text-muted small mb-0">
+                                    <strong>{{ complaint.title }}</strong>
+                                </p>
+                                <small class="text-muted">{{ complaint.created_at|date:"M d, Y H:i" }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding: 0;
+    }
+
+    .timeline-item {
+        position: relative;
+    }
+
+    .timeline-marker {
+        position: relative;
+        width: 30px;
+        min-width: 30px;
+    }
+
+    .timeline-dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        box-shadow: 0 0 0 2px #e9ecef;
+        margin-top: 2px;
+    }
+
+    .timeline-item:not(:last-child)::before {
+        content: '';
+        position: absolute;
+        left: 7px;
+        top: 20px;
+        bottom: -30px;
+        width: 2px;
+        background-color: #e9ecef;
+    }
+</style>
+{% endblock %}
