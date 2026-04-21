@@ -4,14 +4,20 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator
 from .models import Complaint, Comment, EmailVerificationToken, PasswordResetToken
 from .forms import ComplaintForm, CommentForm, PasswordResetRequestForm, PasswordResetForm
+from openpyxl import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
+from openpyxl.cell.cell import Cell
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from datetime import datetime
 from django.db.models import Q, Count
 from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
+from typing import cast
 import secrets
 
 
@@ -90,10 +96,11 @@ def register(request):
         # Generate email verification token
         token = EmailVerificationToken.generate_token()
         EmailVerificationToken.objects.create(user=user, token=token)
-        
+
         # Send verification email
+        typed_user = cast(User, user)
         verification_url = request.build_absolute_uri(
-            reverse('verify_email', args=[user.id, token])
+            reverse('verify_email', args=[typed_user.pk, token])
         )
         
         subject = 'Verify Your Email - SANKALP Campus Management'
@@ -172,7 +179,7 @@ def login_view(request):
                     request,
                     'Your email address is not verified. Please check your inbox for the verification link.'
                 )
-                return render(request, 'login.html', {'role': role, 'unverified_email': user.email})
+                return render(request, 'login.html', {'role': role, 'unverified_email': cast(User, user).email})
             
             # Role-based access control
             if role == 'admin':
@@ -277,7 +284,7 @@ def resend_verification(request):
             EmailVerificationToken.objects.create(user=user, token=token)
             
             verification_url = request.build_absolute_uri(
-                reverse('verify_email', args=[user.id, token])
+                reverse('verify_email', args=[cast(User, user).pk, token])
             )
             
             try:
@@ -310,20 +317,21 @@ def forgot_password(request):
         if form.is_valid():
             email = form.cleaned_data['email']
             user = User.objects.get(email=email)
-            
+            typed_user = cast(User, user)
+
             # Delete any existing unused tokens for this user
-            PasswordResetToken.objects.filter(user=user, used=False).delete()
-            
+            PasswordResetToken.objects.filter(user=typed_user, used=False).delete()
+
             # Create new DB-stored token
             token = PasswordResetToken.generate_token()
-            PasswordResetToken.objects.create(user=user, token=token)
-            
+            PasswordResetToken.objects.create(user=typed_user, token=token)
+
             reset_url = request.build_absolute_uri(
-                reverse('reset_password', args=[user.id, token])
+                reverse('reset_password', args=[typed_user.pk, token])
             )
-            
+
             subject = 'Password Reset Request - SANKALP Campus Management'
-            message = f"""Hello {user.first_name or user.username},
+            message = f"""Hello {typed_user.first_name or typed_user.username},
 
 We received a request to reset your SANKALP account password.
 
@@ -458,10 +466,11 @@ def complaint_detail(request, pk):
         messages.error(request, 'Unauthorized access')
         return redirect('dashboard')
     
-    comments = complaint.comments.all().order_by('-created_at')
-    
+    typed_complaint = cast(Complaint, complaint)
+    comments = typed_complaint.comments.all().order_by('-created_at')  # type: ignore[attr-defined]
+
     context = {
-        'complaint': complaint,
+        'complaint': typed_complaint,
         'comments': comments,
         'is_owner': is_owner,
     }
@@ -514,7 +523,7 @@ def delete_complaint(request, pk):
 
     if request.method == 'POST':
         complaint_title = complaint.title
-        complaint_id = complaint.id
+        complaint_id = cast(Complaint, complaint).pk
         complaint.delete()
         messages.success(request, f'Complaint "{complaint_title}" (ID: {complaint_id}) has been deleted successfully.')
         if is_admin:
@@ -752,8 +761,8 @@ def admin_edit_complaint(request, pk):
         messages.success(request, 'Complaint updated successfully')
         return redirect('admin_dashboard')
     
-    comments = complaint.comments.all().order_by('-created_at')
-    
+    comments = cast(Complaint, complaint).comments.all().order_by('-created_at')  # type: ignore[attr-defined]
+
     context = {
         'complaint': complaint,
         'comments': comments,
@@ -958,6 +967,199 @@ def admin_recent_activity(request):
     }
     
     return render(request, 'admin_recent_activity.html', context)
+
+
+# ==================== EXCEL EXPORT ====================
+@login_required(login_url='login')
+def export_complaints_excel(request):
+    """
+    Export all complaints to Excel file with formatted styling.
+    """
+    if not (request.user.is_staff or request.user.is_superuser):
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('dashboard')
+    
+    # Create workbook
+    wb = Workbook()
+    ws = cast(Worksheet, wb.active)
+    ws.title = "Complaints"
+    
+    # Define styles
+    header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF", size=12)
+    border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Headers
+    headers = ['ID', 'Title', 'Category', 'Status', 'Priority', 'Reporter', 'Assigned To', 'Location', 'Created Date', 'Updated Date', 'Description']
+    ws.append(headers)
+    
+    # Style header row
+    for cell in ws[1]:  # type: ignore[union-attr]
+        c = cast(Cell, cell)
+        c.fill = header_fill
+        c.font = header_font
+        c.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+        c.border = border
+
+    # Add data rows
+    complaints = Complaint.objects.all().order_by('-created_at')
+    for complaint in complaints:
+        c_obj = cast(Complaint, complaint)
+        ws.append([
+            c_obj.pk,
+            c_obj.title,
+            c_obj.get_category_display(),  # type: ignore[attr-defined]
+            c_obj.status,
+            c_obj.get_priority_display(),  # type: ignore[attr-defined]
+            c_obj.user.get_full_name() or c_obj.user.username,
+            c_obj.assigned_to.get_full_name() or c_obj.assigned_to.username if c_obj.assigned_to else 'Unassigned',
+            c_obj.location or 'Not specified',
+            c_obj.created_at.strftime('%Y-%m-%d %H:%M'),
+            c_obj.updated_at.strftime('%Y-%m-%d %H:%M'),
+            c_obj.description[:100] + '...' if len(c_obj.description) > 100 else c_obj.description
+        ])
+
+    # Style data rows
+    for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
+        for cell in row:
+            c = cast(Cell, cell)
+            c.border = border
+            c.alignment = Alignment(wrap_text=True, vertical='top')
+    
+    # Adjust column widths
+    ws.column_dimensions['A'].width = 6
+    ws.column_dimensions['B'].width = 25
+    ws.column_dimensions['C'].width = 15
+    ws.column_dimensions['D'].width = 12
+    ws.column_dimensions['E'].width = 10
+    ws.column_dimensions['F'].width = 20
+    ws.column_dimensions['G'].width = 20
+    ws.column_dimensions['H'].width = 20
+    ws.column_dimensions['I'].width = 18
+    ws.column_dimensions['J'].width = 18
+    ws.column_dimensions['K'].width = 30
+    
+    # Create response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="complaints_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
+    
+    wb.save(response)
+    return response
+
+
+@login_required(login_url='login')
+def export_statistics_excel(request):
+    """
+    Export statistics and analytics report to Excel.
+    """
+    if not (request.user.is_staff or request.user.is_superuser):
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('dashboard')
+    
+    # Create workbook
+    wb = Workbook()
+    
+    # Summary sheet
+    ws1 = cast(Worksheet, wb.active)
+    ws1.title = "Summary"
+    
+    header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF", size=12)
+    border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Summary statistics
+    total_complaints = Complaint.objects.count()
+    pending = Complaint.objects.filter(status='Pending').count()
+    in_progress = Complaint.objects.filter(status='In Progress').count()
+    resolved = Complaint.objects.filter(status='Resolved').count()
+    rejected = Complaint.objects.filter(status='Rejected').count()
+    
+    ws1['A1'] = "COMPLAINT STATISTICS REPORT"
+    cast(Cell, ws1['A1']).font = Font(bold=True, size=14)
+    ws1['A2'] = f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+
+    ws1['A4'] = "Metric"
+    ws1['B4'] = "Count"
+
+    for cell in [ws1['A4'], ws1['B4']]:
+        c = cast(Cell, cell)
+        c.fill = header_fill
+        c.font = header_font
+        c.border = border
+    
+    data = [
+        ("Total Complaints", total_complaints),
+        ("Pending", pending),
+        ("In Progress", in_progress),
+        ("Resolved", resolved),
+        ("Rejected", rejected),
+        ("Resolution Rate", f"{int((resolved / total_complaints * 100) if total_complaints > 0 else 0)}%"),
+    ]
+    
+    row_num = 5
+    for metric, value in data:
+        ws1[f'A{row_num}'] = metric
+        ws1[f'B{row_num}'] = value
+        for cell in [ws1[f'A{row_num}'], ws1[f'B{row_num}']]:
+            cast(Cell, cell).border = border
+        row_num += 1
+    
+    ws2 = cast(Worksheet, wb.create_sheet("Categories"))
+    ws2['A1'] = "CATEGORY BREAKDOWN"
+    cast(Cell, ws2['A1']).font = Font(bold=True, size=14)
+
+    ws2['A3'] = "Category"
+    ws2['B3'] = "Count"
+    ws2['C3'] = "Percentage"
+
+    for cell in [ws2['A3'], ws2['B3'], ws2['C3']]:
+        c = cast(Cell, cell)
+        c.fill = header_fill
+        c.font = header_font
+        c.border = border
+    
+    row_num = 4
+    for category, name in Complaint.CATEGORY_CHOICES:
+        count = Complaint.objects.filter(category=category).count()
+        percentage = int((count / total_complaints * 100) if total_complaints > 0 else 0)
+        
+        ws2[f'A{row_num}'] = name
+        ws2[f'B{row_num}'] = count
+        ws2[f'C{row_num}'] = f"{percentage}%"
+        
+        for cell in [ws2[f'A{row_num}'], ws2[f'B{row_num}'], ws2[f'C{row_num}']]:
+            cast(Cell, cell).border = border
+        
+        row_num += 1
+    
+    ws2.column_dimensions['A'].width = 20
+    ws2.column_dimensions['B'].width = 12
+    ws2.column_dimensions['C'].width = 12
+    
+    # Adjust column width
+    ws1.column_dimensions['A'].width = 25
+    ws1.column_dimensions['B'].width = 15
+    
+    # Create response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="statistics_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
+    
+    wb.save(response)
+    return response
 
 
 def terms_and_conditions(request):

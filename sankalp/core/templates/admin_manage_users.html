@@ -19,8 +19,11 @@
             <p class="text-muted">User management and administration</p>
         </div>
         <div class="col-md-4 text-end">
-            <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            <button class="btn btn-outline-secondary me-2" onclick="history.back()" title="Go back to previous page">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-primary">
+                <i class="fas fa-home"></i> Dashboard
             </a>
         </div>
     </div>

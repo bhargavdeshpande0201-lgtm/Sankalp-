@@ -35,6 +35,8 @@ urlpatterns = [
     path('admin/users', views.admin_manage_users, name='admin_manage_users'),
     path('admin/reports', views.admin_reports, name='admin_reports'),
     path('admin/activity', views.admin_recent_activity, name='admin_recent_activity'),
+    path('admin/export/complaints', views.export_complaints_excel, name='export_complaints_excel'),
+    path('admin/export/statistics', views.export_statistics_excel, name='export_statistics_excel'),
     
     # Terms and Support
     path('terms-and-conditions', views.terms_and_conditions, name='terms_and_conditions'),

@@ -12,6 +12,9 @@
             <p class="text-muted">Welcome, {{ user.get_full_name|default:user.username }}!</p>
         </div>
         <div class="col-md-4 text-end">
+            <button class="btn btn-outline-secondary me-2" onclick="history.back()" title="Go back to previous page">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
             <a href="/add-complaint" class="btn btn-primary btn-lg">
                 <i class="fas fa-plus-circle"></i> Report New Issue
             </a>

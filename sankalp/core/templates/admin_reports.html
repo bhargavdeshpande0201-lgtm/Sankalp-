@@ -19,9 +19,31 @@
             <p class="text-muted">Complaint statistics and system insights</p>
         </div>
         <div class="col-md-4 text-end">
-            <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            <button class="btn btn-outline-secondary me-2" onclick="history.back()" title="Go back to previous page">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-primary">
+                <i class="fas fa-home"></i> Dashboard
             </a>
+        </div>
+    </div>
+
+    <!-- Export Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-light">
+                <div class="card-body p-4">
+                    <h5 class="mb-3 fw-bold"><i class="fas fa-file-export"></i> Export Reports</h5>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{% url 'export_complaints_excel' %}" class="btn btn-success">
+                            <i class="fas fa-file-excel"></i> Export All Complaints (Excel)
+                        </a>
+                        <a href="{% url 'export_statistics_excel' %}" class="btn btn-info">
+                            <i class="fas fa-chart-line"></i> Export Statistics Report (Excel)
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
