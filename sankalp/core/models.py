@@ -11,6 +11,7 @@ class Complaint(models.Model):
         ('Parking', 'Parking Issues'),
         ('Infrastructure', 'Infrastructure Damage'),
         ('Security', 'Security Incident'),
+        ('Other', 'Other'),
     ]
     
     STATUS_CHOICES = [

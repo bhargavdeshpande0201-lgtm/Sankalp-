@@ -109,11 +109,18 @@ Hello {username},
 
 Welcome to SANKALP Campus Management System!
 
-Please verify your email address by clicking the link below:
+Your account has been created successfully. Here are your login details:
+
+  Username : {username}
+  Password : {password1}
+
+Please verify your email address by clicking the link below to activate your account:
 
 {verification_url}
 
-This link will expire in 24 hours.
+This verification link will expire in 24 hours.
+
+Once verified, you can log in at: http://10.37.189.48:8000/login
 
 If you didn't create this account, please ignore this email.
 

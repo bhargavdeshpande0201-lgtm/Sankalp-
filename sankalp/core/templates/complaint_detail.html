@@ -88,8 +88,8 @@
                 </div>
             </div>
 
-            <!-- Update Status Card (for admin/staff only) -->
-            {% if user.is_staff or user == complaint.user %}
+            <!-- Update Status Card (admin/staff only) -->
+            {% if user.is_staff %}
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom">
                     <h5 class="mb-0 fw-bold">

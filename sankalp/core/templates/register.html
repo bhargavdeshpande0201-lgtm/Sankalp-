@@ -111,7 +111,7 @@ z                                <small class="form-text text-muted">Letters, di
                         <div class="form-check mb-4">
                             <input class="form-check-input" type="checkbox" id="agree" name="agree" required>
                             <label class="form-check-label" for="agree">
-                                I agree to the <a href="{% url 'terms_and_conditions' %}" class="text-primary" target="_blank">Terms & Conditions</a>
+                                I agree to the <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#termsModal">Terms &amp; Conditions</a>
                             </label>
                         </div>
 
@@ -133,6 +133,54 @@ z                                <small class="form-text text-muted">Letters, di
                         <a href="/" class="text-muted">Back to Home</a>
                     </p>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms & Conditions Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="termsModalLabel">
+                    <i class="fas fa-file-contract"></i> Terms and Conditions
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted small"><strong>Last Updated:</strong> April 18, 2024</p>
+                <h6 class="fw-bold">1. Acceptance of Terms</h6>
+                <p class="small">By accessing and using the SANKALP Campus Management System, you accept and agree to be bound by these terms. If you do not agree, please do not use this service.</p>
+                <h6 class="fw-bold">2. Use License</h6>
+                <p class="small">You may use this platform for personal, non-commercial purposes only. You may not modify, copy, or distribute any materials from this platform.</p>
+                <h6 class="fw-bold">3. User Responsibilities</h6>
+                <ul class="small">
+                    <li>Provide accurate and truthful information during registration and complaint submission</li>
+                    <li>Use the system responsibly and lawfully</li>
+                    <li>Not submit false, misleading, or malicious complaints</li>
+                    <li>Maintain the confidentiality of your account credentials</li>
+                </ul>
+                <h6 class="fw-bold">4. Complaint Submission Guidelines</h6>
+                <ul class="small">
+                    <li>Complaints must be related to campus facilities, services, or security</li>
+                    <li>Complaints must be submitted in good faith with factual information</li>
+                    <li>Deliberately false complaints may result in disciplinary action</li>
+                </ul>
+                <h6 class="fw-bold">5. Privacy and Data Protection</h6>
+                <p class="small">Your personal information will be kept confidential and stored securely. Data is accessed only by authorized personnel and retained only as long as necessary.</p>
+                <h6 class="fw-bold">6. Limitation of Liability</h6>
+                <p class="small">The materials on SANKALP are provided on an 'as is' basis without warranties of any kind. SANKALP will not be liable for damages arising from the use of this platform.</p>
+                <h6 class="fw-bold">7. Modifications to Terms</h6>
+                <p class="small">SANKALP may revise these terms at any time without notice. Continued use of the platform constitutes acceptance of the revised terms.</p>
+                <h6 class="fw-bold">8. Contact</h6>
+                <p class="small mb-0">For questions: <strong>support@sankalp.edu.in</strong> | Mon–Fri, 9 AM – 6 PM</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="document.getElementById('agree').checked=true;">
+                    <i class="fas fa-check"></i> I Agree
+                </button>
             </div>
         </div>
     </div>

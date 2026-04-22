@@ -154,13 +154,13 @@
                     <a href="/add-complaint" class="list-group-item list-group-item-action border-0 px-0 py-2">
                         <i class="fas fa-plus-circle text-primary"></i> Report New Issue
                     </a>
-                    <a href="/complaints" class="list-group-item list-group-item-action border-0 px-0 py-2">
+                    <a href="{% url 'search_complaints' %}" class="list-group-item list-group-item-action border-0 px-0 py-2">
                         <i class="fas fa-list text-success"></i> View All Complaints
                     </a>
-                    <a href="/profile" class="list-group-item list-group-item-action border-0 px-0 py-2">
+                    <a href="{% url 'profile' %}" class="list-group-item list-group-item-action border-0 px-0 py-2">
                         <i class="fas fa-user text-info"></i> My Profile
                     </a>
-                    <a href="/contact" class="list-group-item list-group-item-action border-0 px-0 py-2">
+                    <a href="{% url 'contact_support' %}" class="list-group-item list-group-item-action border-0 px-0 py-2">
                         <i class="fas fa-phone text-warning"></i> Contact Support
                     </a>
                 </div>

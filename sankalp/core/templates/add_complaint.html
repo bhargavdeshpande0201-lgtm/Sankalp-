@@ -50,12 +50,13 @@
                             <label for="id_category" class="form-label fw-bold">
                                 <i class="fas fa-folder"></i> Category *
                             </label>
-                            <select name="category" id="id_category" class="form-select" required>
+                            <select name="category" id="id_category" class="form-select" required onchange="toggleOtherCategory(this)">
                                 <option value="">-- Select a Category --</option>
                                 <option value="Waste">Waste Management</option>
                                 <option value="Parking">Parking Issues</option>
                                 <option value="Infrastructure">Infrastructure Damage</option>
                                 <option value="Security">Security Incident</option>
+                                <option value="Other">Other</option>
                             </select>
                             <small class="form-text text-muted d-block mt-1">Select the type of issue you're reporting</small>
                             {% if form.category.errors %}
@@ -63,6 +64,15 @@
                                 {% for error in form.category.errors %}{{ error }}<br>{% endfor %}
                             </div>
                             {% endif %}
+                        </div>
+
+                        <!-- Other Category Custom Input (shown only when "Other" is selected) -->
+                        <div class="mb-4" id="otherCategoryDiv" style="display:none;">
+                            <label for="other_category_text" class="form-label fw-bold">
+                                <i class="fas fa-pen"></i> Describe Your Category *
+                            </label>
+                            <input type="text" id="other_category_text" class="form-control" placeholder="e.g., Canteen hygiene, Library issue, etc." maxlength="100">
+                            <small class="form-text text-muted d-block mt-1">Briefly describe the type of issue</small>
                         </div>
 
                         <!-- Description -->
@@ -295,6 +305,38 @@
 
 {% block extra_js %}
 <script>
+    // Toggle "Other" category input
+    function toggleOtherCategory(select) {
+        const otherDiv = document.getElementById('otherCategoryDiv');
+        const otherInput = document.getElementById('other_category_text');
+        if (select.value === 'Other') {
+            otherDiv.style.display = 'block';
+            otherInput.required = true;
+        } else {
+            otherDiv.style.display = 'none';
+            otherInput.required = false;
+        }
+    }
+
+    // Before submit: prepend custom category text to description
+    document.getElementById('complaintForm').addEventListener('submit', function(e) {
+        const category = document.getElementById('id_category').value;
+        const otherText = document.getElementById('other_category_text').value.trim();
+        const description = document.getElementById('id_description');
+
+        if (category === 'Other') {
+            if (!otherText) {
+                e.preventDefault();
+                document.getElementById('other_category_text').classList.add('is-invalid');
+                return;
+            }
+            // Prepend the custom category label to the description
+            if (!description.value.startsWith('[Category: ')) {
+                description.value = '[Category: ' + otherText + ']\n' + description.value;
+            }
+        }
+    });
+
     // Image preview
     document.getElementById('id_image').addEventListener('change', function(e) {
         const file = e.target.files[0];
